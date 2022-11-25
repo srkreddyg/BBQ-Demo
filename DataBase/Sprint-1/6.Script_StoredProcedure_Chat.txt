@@ -1,0 +1,452 @@
+/* CreateGroup */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  CreateGroup;
+CREATE PROCEDURE CreateGroup(IN GroupUsers json, OUT GroupIDVal int)
+Begin
+	 
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+		SET GroupIDVal = 0;
+		ROLLBACK;
+    END;
+
+    Start transaction;
+
+        SELECT json_extract(GroupUsers,'$.Group') into @group_data;
+		SELECT json_extract(GroupUsers,'$.userOperations') into @userOperations_data;
+        select json_length(@userOperations_data) into @userOperations_length;
+       
+        INSERT INTO BBQN.groups (GroupName,GroupDescription,GroupURL,StartDate,EndDate,FilterOperator,IsAutoEnroled,CompanyID,
+        RoleID,GradeID,RegionID,OutletID,DepartmentID,SubDepartmentID,EmployeeCategoryID,DivisionID,
+        IsGroupDeleted,IsExEmployeesGroup,IsActiveStatus,CreatedBy,LastModifiedBy,LastModifiedDate) 
+			VALUES (json_extract(@group_data,'$.GroupName'),json_extract(@group_data,'$.GroupDescription'),
+					json_extract(@group_data,'$.GroupURL'), CAST(json_extract(@group_data,'$.StartDate')AS DATE),CAST(json_extract(@group_data,'$.EndDate')AS DATE),
+					json_extract(@group_data,'$.FilterOperator'),
+                    CASE WHEN json_extract(@group_data,'$.IsAutoEnroled') = true
+                            THEN 1
+                            ELSE 2
+                            END,json_extract(@group_data,'$.CompanyID'),
+					json_extract(@group_data,'$.RoleID'), json_extract(@group_data,'$.GradeID'),json_extract(@group_data,'$.RegionID'),
+					json_extract(@group_data,'$.OutletID'), json_extract(@group_data,'$.DepartmentID'),json_extract(@group_data,'$.SubDepartmentID'),
+					json_extract(@group_data,'$.EmployeeCategoryID'), json_extract(@group_data,'$.DivisionID'),
+						CASE WHEN json_extract(@group_data,'$.IsGroupDeleted') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+						CASE WHEN json_extract(@group_data,'$.IsExEmployeesGroup') = true
+                            THEN 1
+                            ELSE 2
+                            END, 
+						CASE WHEN json_extract(@group_data,'$.IsActiveStatus') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+					json_extract(@group_data,'$.CreatedBy'),
+                    json_extract(@group_data,'$.LastModifiedBy'),now());
+ 
+                    SELECT LAST_INSERT_ID() INTO @group_pk;
+                    
+        set @count=0;
+		 while @count< @userOperations_length do
+			 select json_extract(@userOperations_data,concat('$[',@count,'].action')) into @userOperations_action;
+             select json_extract(@userOperations_data,concat('$[',@count,'].user')) into @userOperations_user_row;
+			 insert into groupuser(GroupID,UserID,IsGroupUserDeleted,LastModifiedBy,LastModifiedDate,IsGroupUserBlocked) 
+				values (@group_pk,json_extract(@userOperations_user_row,'$.UserID'),
+							CASE WHEN @userOperations_action = 1
+                            THEN 1
+                            ELSE 2
+                            END,
+                            json_extract(@userOperations_user_row,'$.LastModifiedBy'),
+                            now(),
+                            CASE WHEN @userOperations_action = 3
+                            THEN 1
+                            ELSE 2
+                            END);
+			 set @count=@count+1;
+		 end while;
+		
+commit;
+    SET GroupIDVal = (SELECT LAST_INSERT_ID());
+End $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* DeleteGroup */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  DeleteGroup;
+CREATE PROCEDURE DeleteGroup(IN GroupIDValue int,in EmployeeIDValue varchar(100),OUT flag bool)
+Begin
+	Declare uLogINID int;
+     select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeIDValue limit 1;
+    BEGIN
+		SET flag = false;
+		ROLLBACK;
+    END;
+    Start transaction;
+        -- delete from Child table
+        Update bbqn.groupuser set IsGroupUserDeleted=1,LastModifiedBy=uLogINID ,LastModifiedDate=now() WHERE GroupID=GroupIDValue;
+        -- delete from Parent table
+        Update bbqn.groups set IsGroupDeleted=1 ,LastModifiedBy=uLogINID ,LastModifiedDate=now() WHERE GroupID=GroupIDValue;
+	commit;
+    SET flag = true;
+End $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* DeleteUserGroup */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  DeleteUserGroup;
+CREATE PROCEDURE DeleteUserGroup(IN GroupIDValue int,IN UserIDValue int,in EmployeeIDValue varchar(100),out IsDeleted bool)
+Begin
+	Declare uLogINID int;
+     select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeIDValue limit 1;
+    BEGIN
+		SET IsDeleted = false;
+		ROLLBACK;
+    END;
+    Start transaction;
+        -- soft delete from Child table
+        Update bbqn.groupuser set IsGroupUserDeleted='1',LastModifiedBy=uLogINID ,LastModifiedDate=now()  WHERE GroupID=GroupIDValue and UserId=UserIDValue;
+	commit;
+    SET IsDeleted = true;
+End $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* GetGroups */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  GetGroups;
+CREATE PROCEDURE GetGroups()
+BEGIN
+	SELECT g.GroupID,g.GroupName,g.GroupDescription,g.GroupURL,g.IsAutoEnroled,StartDate,EndDate,FilterOperator,g.CompanyID,c.CompanyDescription as CompanyName,
+    g.RoleID,r.Description as RoleName,g.GradeID,gr.GradeDescription as GradeName,g.RegionID,rg.RegionName,g.OutletID,o.OutletName,
+    g.DepartmentID,dept.DepartmentDescription as DepartmentName,g.SubDepartmentID,sd.SubDepartmentDescription as SubDepartmentName,
+    g.EmployeeCategoryID,emp.Description as EmployeeCategoryName,g.DivisionID,d.Description as DivisionName,g.IsGroupDeleted,g.IsExEmployeesGroup,g.IsActiveStatus,
+    g.CreatedBy,u.FirstName as CreatedByName,g.LastModifiedBy,ur.FirstName as LastModifiedName,g.LastModifiedDate
+	FROM BBQN.groups g
+    Left Join BBQN.company c on c.CompanyID=g.CompanyID
+    Left Join BBQN.userrole r on r.RoleID=g.RoleID
+    Left Join BBQN.grade gr on gr.GradeID=g.GradeID
+    Left Join BBQN.regions rg on rg.RegionID=g.RegionID
+	Left Join BBQN.outlets o on o.OutletID=g.OutletID
+	Left Join BBQN.departments dept on dept.DepartmentID=g.DepartmentID
+	Left Join BBQN.subdepartments sd on sd.SubDepartmentID=g.SubDepartmentID
+	Left Join BBQN.employeecategory emp on emp.EmployeeCategoryID=g.EmployeeCategoryID
+    Left Join BBQN.divisions d on d.DivisionID=g.DivisionID
+    Left Join BBQN.Users u on u.userid=g.createdby
+    Left Join BBQN.Users ur on ur.userid=g.LastModifiedBy
+    Order by g.GroupName asc;
+End $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* GetGroupsUser */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  GetGroupsUser;
+CREATE PROCEDURE GetGroupsUser(in UserIdValue int)
+BEGIN
+	SELECT g.GroupID,g.GroupName,g.GroupDescription,g.GroupURL,g.IsAutoEnroled,StartDate,EndDate,FilterOperator,g.CompanyID,c.CompanyDescription as CompanyName,
+    g.RoleID,r.Description as RoleName,g.GradeID,gr.GradeDescription as GradeName,g.RegionID,rg.RegionName,g.OutletID,o.OutletName,
+    g.DepartmentID,dept.DepartmentDescription as DepartmentName,g.SubDepartmentID,sdept.SubDepartmentDescription as SubDepartmentName,
+    g.EmployeeCategoryID,emp.Description as EmployeeCategoryName,g.DivisionID,d.Description as DivisionName,g.IsGroupDeleted,g.IsExEmployeesGroup,g.IsActiveStatus,
+    g.CreatedBy,u.FirstName as CreatedByName,g.LastModifiedBy,ur.FirstName as LastModifiedName,g.LastModifiedDate  
+	FROM BBQN.groups g
+    Left Join BBQN.groupuser gur on gur.GroupID=g.GroupID
+    Left Join BBQN.company c on c.CompanyID=g.CompanyID
+    Left Join BBQN.userrole r on r.RoleID=g.RoleID
+    Left Join BBQN.grade gr on gr.GradeID=g.GradeID
+	Left Join BBQN.regions rg on rg.RegionID=g.RegionID
+    Left Join BBQN.outlets o on o.OutletID=g.OutletID
+	Left Join BBQN.departments dept on dept.DepartmentID=g.DepartmentID
+    Left Join BBQN.subdepartments sdept on sdept.SubDepartmentID=g.SubDepartmentID
+    Left Join BBQN.employeecategory emp on emp.EmployeeCategoryID=g.EmployeeCategoryID
+    Left Join BBQN.divisions d on d.DivisionID=g.DivisionID
+    Left Join BBQN.Users u on u.userid=g.createdby
+    Left Join BBQN.Users ur on ur.userid=g.LastModifiedBy
+    where gur.UserID=UserIdValue
+    Order by g.GroupName asc;
+END $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* GetGroupUsers */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  GetGroupUsers;
+CREATE PROCEDURE GetGroupUsers(in GroupIDValue int)
+BEGIN
+	SELECT u.UserID,u.UserLoginID,u.FirstName,u.LastName,u.Gender,u.CompanyID,u.EmailID,u.JoiningDate,u.LeavingDate,u.MobileNumber,u.IsBlock,
+    u.IsSuperAdmin,u.IsPrivilegedUser,u.IsAdmin,u.IsActiveStatus,u.OutletID,o.OutletName,u.GradeID,g.GradeDescription as GradeName,u.RoleID,ur.Description as RoleName, 
+    u.RegionID,reg.RegionName,u.DepartmentID,dept.DepartmentDescription as DepartmentName,u.SubDepartmentID,sdept.SubDepartmentDescription as SubDepartmentName,
+    u.EmployeeCategoryID,emp.Description as EmployeeCategoryName,u.DivisionID,d.Description as DivisionName,u.UserID as LastModifiedBy,u.FirstName as LastModifiedName,u.LastModifiedDate
+	FROM bbqn.users u
+    Left Join BBQN.groupuser gur on gur.UserID=u.UserID
+    Left Join BBQN.outlets o on o.OutletID=u.UserID
+    Left Join BBQN.grade g on g.GradeID=u.GradeID
+    Left Join BBQN.userrole ur on ur.RoleID=u.RoleID
+    Left Join BBQN.regions reg on reg.RegionID=u.RegionID
+    Left Join BBQN.departments dept on dept.DepartmentID=u.DepartmentID
+    Left Join BBQN.subdepartments sdept on sdept.SubDepartmentID=u.SubDepartmentID
+    Left Join BBQN.divisions d on d.DivisionID=u.DivisionID
+    Left Join BBQN.employeecategory emp on emp.EmployeeCategoryID=u.EmployeeCategoryID
+    where gur.GroupID=GroupIDValue
+    Order by u.FirstName asc;
+END $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* GetUsers */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  GetUsers;
+CREATE PROCEDURE GetUsers(IN GetUserFilter Json , IN FilterOperator int, IN StartDate varchar(10),IN EndDate varchar(10))
+Begin
+  DROP TABLE IF EXISTS `User_Data`;
+  CREATE TEMPORARY TABLE User_Data ( UserID int NOT NULL,
+  UserLoginID varchar(100) NOT NULL,
+  FirstName varchar(100) NOT NULL,
+  LastName varchar(100) NOT NULL,
+  Gender enum('M','F') NOT NULL DEFAULT 'M',
+  CompanyID int NOT NULL,
+  EmailID varchar(100) DEFAULT NULL,
+  JoiningDate datetime NOT NULL,
+  LeavingDate datetime DEFAULT NULL,
+  MobileNumber bigint NOT NULL,
+  IsBlock enum('0','1') NOT NULL DEFAULT '0',
+  IsSuperAdmin enum('0','1') NOT NULL DEFAULT '0',
+  IsPrivilegedUser enum('0','1') NOT NULL DEFAULT '0',
+  IsAdmin enum('1,0') DEFAULT NULL,
+  IsActiveStatus enum('0','1') NOT NULL DEFAULT '1',
+  OutletID int NOT NULL,
+  GradeID int NOT NULL,
+  RoleID int NOT NULL,
+  RegionID int NOT NULL,
+  DepartmentID int NOT NULL,
+  SubDepartmentID int NOT NULL,
+  EmployeeCategoryID int NOT NULL,
+  DivisionID int NOT NULL,
+  LastModifiedBy int NOT NULL,
+  LastModifiedDate datetime NOT NULL DEFAULT CURRENT_TIMESTAMP);
+  
+	SELECT json_extract(GetUserFilter,'$') into @row_data;
+    SELECT json_extract( @row_data,'$.filterCondition') into @filterrow_data;
+
+    INSERT INTO User_Data (
+    Select userid,UserLoginID,FirstName,LastName,Gender,CompanyID,EmailID,JoiningDate,LeavingDate,MobileNumber,IsBlock,IsSuperAdmin,IsPrivilegedUser,IsAdmin,ISActiveStatus,
+    OutletID,GradeID,RoleID,RegionID,DepartmentID,SubDepartmentID,EmployeeCategoryID,DivisionID,LastModifiedBy,LastModifiedDate FROM bbqn.users u
+    
+	WHERE u.CompanyID = CASE WHEN (json_extract(@row_data,'$.CompanyID')) =0
+                            THEN u.CompanyID
+                            ELSE (CAST(json_extract(@row_data,'$.CompanyID') AS UNSIGNED))
+                            END
+	AND u.OutletID = CASE WHEN ((json_extract(@row_data,'$.OutletID')))  =0
+                            THEN u.OutletID
+                            ELSE (CAST(json_extract(@row_data,'$.OutletID') AS UNSIGNED))
+                            END
+	AND u.GradeID = CASE WHEN ((json_extract(@row_data,'$.GradeID') ))  =0
+                            THEN u.GradeID
+                            ELSE (CAST(json_extract(@row_data,'$.GradeID') AS UNSIGNED))
+                            END
+	AND u.RoleID = CASE WHEN ((json_extract(@row_data,'$.RoleID') ))  =0
+                            THEN u.RoleID
+                            ELSE (CAST(json_extract(@row_data,'$.RoleID') AS UNSIGNED))
+                            END
+	AND u.RegionID = CASE WHEN ((json_extract(@row_data,'$.RegionID') )) =0
+                            THEN u.RegionID
+                            ELSE (CAST(json_extract(@row_data,'$.RegionID') AS UNSIGNED))
+                            END
+	AND u.DepartmentID = CASE WHEN ((json_extract(@row_data,'$.Department') ))  =0
+                            THEN u.DepartmentID
+                            ELSE (CAST(json_extract(@row_data,'$.Department') AS UNSIGNED))
+                            END
+	AND u.SubDepartmentID = CASE WHEN ((json_extract(@row_data,'$.SubDepartment') ))  =0
+                            THEN u.SubDepartmentID
+                            ELSE (CAST(json_extract(@row_data,'$.SubDepartment') AS UNSIGNED))
+                            END
+	
+	AND u.EmployeeCategoryID = CASE WHEN ((json_extract(@row_data,'$.EmployeeCategoryID') ))  =0
+                            THEN u.EmployeeCategoryID
+                            ELSE (CAST(json_extract(@row_data,'$.EmployeeCategoryID') AS UNSIGNED))
+                            END
+	AND u.DivisionID = CASE WHEN ((json_extract(@row_data,'$.DivisionID') ))  =0
+                            THEN u.DivisionID
+                            ELSE (CAST(json_extract(@row_data,'$.DivisionID') AS UNSIGNED))
+                            END );
+							
+							
+	
+    if(FilterOperator =5) then
+      Select * From User_Data where date(JoiningDate) between StartDate and  EndDate;
+     ELSE if(FilterOperator =0) then
+       Select * From User_Data;
+    Else IF (FilterOperator =4) then
+       Select * From User_Data where date(JoiningDate) <=StartDate;
+	Else IF (FilterOperator =3) then
+        Select * From User_Data where date(JoiningDate) >=StartDate;
+     Else IF (FilterOperator =2) then
+        Select * From User_Data where date(JoiningDate) <StartDate;
+     Else IF (FilterOperator =1) then
+        Select * From User_Data where date(JoiningDate) >StartDate;
+      Else 
+        Select * From User_Data where date(JoiningDate) =StartDate;
+        ENd IF;
+      END IF;
+    End IF;       
+       END IF;
+    End IF;     
+       END IF;
+END $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* UpdateGroup */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  UpdateGroup;
+CREATE  PROCEDURE UpdateGroup(IN GroupUsers json, OUT flag bool)
+
+Begin
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+		SET flag = false;
+		ROLLBACK;
+    END;
+    
+    Start transaction;
+		SELECT json_extract(GroupUsers,'$.Group') into @group_data;
+		SELECT json_extract(GroupUsers,'$.userOperations') into @userOperations_data;
+        select json_length(@userOperations_data) into @userOperations_length;
+        UPDATE bbqn.groups SET GroupName=json_extract(@group_data,'$.GroupName'),GroupDescription=json_extract(@group_data,'$.GroupDescription'),
+			GroupURL=json_extract(@group_data,'$.GroupURL'),
+			IsAutoEnroled=CASE WHEN json_extract(@group_data,'$.IsAutoEnroled') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+			StartDate=CAST(json_extract(@group_data,'$.StartDate')AS DATE),EndDateCAST(json_extract(@group_data,'$.EndDate')AS DATE),
+			FilterOperator=json_extract(@group_data,'$.FilterOperator'),
+			CompanyID=json_extract(@group_data,'$.CompanyID'),RoleID=json_extract(@group_data,'$.RoleID'),
+			GradeID= json_extract(@group_data,'$.GradeID'),RegionID=json_extract(@group_data,'$.RegionID'),
+			OutletID=json_extract(@group_data,'$.OutletID'),DepartmentID=json_extract(@group_data,'$.DepartmentID'),
+			SubDepartmentID=json_extract(@group_data,'$.SubDepartmentID'),EmployeeCategoryID=json_extract(@group_data,'$.EmployeeCategoryID'),
+			DivisionID=json_extract(@group_data,'$.DivisionID'),
+			IsGroupDeleted=CASE WHEN json_extract(@group_data,'$.IsGroupDeleted') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+			IsExEmployeesGroup=CASE WHEN json_extract(@group_data,'$.IsExEmployeesGroup') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+			IsActiveStatus=CASE WHEN json_extract(@group_data,'$.IsActiveStatus') = true
+                            THEN 1
+                            ELSE 2
+                            END,
+			CreatedBy=json_extract(@group_data,'$.CreatedBy'),LastModifiedBy= json_extract(@group_data,'$.LastModifiedBy'),LastModifiedDate=now()
+            WHERE GroupID=json_extract(@group_data,'$.GroupId');
+        set @count=0;
+		 while @count< @userOperations_length do
+			 select json_extract(@userOperations_data,concat('$[',@count,'].action')) into @userOperations_action;
+             select json_extract(@userOperations_data,concat('$[',@count,'].user')) into @userOperations_user_row;
+         
+			 IF (@userOperations_action='0') THEN
+					INSERT INTO bbqn.groupuser(GroupID,UserID,IsGroupUserDeleted,LastModifiedBy,LastModifiedDate)
+						Values (json_extract(@group_data,'$.GroupId'),json_extract(@userOperations_user_row,'$.UserID'),
+                               '0',json_extract(@userOperations_user_row,'$.LastModifiedBy'),now());
+			 ELSE IF (@userOperations_action='2') THEN
+					UPDATE bbqn.groupuser gs SET gs.LastModifiedBy=json_extract(@userOperations_user_row,'$.LastModifiedBy'),gs.LastModifiedDate=now()
+						WHERE GroupID=json_extract(@group_data,'$.GroupId') and gs.UserID=json_extract(@userOperations_user_row,'$.UserID');
+			 ELSE IF (@userOperations_action='1') THEN
+					UPDATE bbqn.groupuser gs SET gs.IsGroupUserDeleted=@userOperations_action,gs.LastModifiedDate=now(),
+						gs.LastModifiedBy=json_extract(@userOperations_user_row,'$.LastModifiedBy')
+						WHERE GroupID=json_extract(@group_data,'$.GroupId') and gs.UserID=json_extract(@userOperations_user_row,'$.UserID');
+                END IF; 
+                END IF;
+                END IF;
+			 set @count=@count+1;
+		 end while;
+commit;
+    SET flag = true;
+End$$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* ChatAuditLog */
+
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS ChatAuditLog;
+CREATE PROCEDURE ChatAuditLog(IN GrpID int, IN ActType Varchar(50), IN Act varchar(1000),,in EmployeeIDValue varchar(100))
+BEGIN
+   Declare uLogINID int;
+     select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeIDValue limit 1;
+   IF(ActType= 'GroupDeleted') then
+		 Select  @grpName :=GroupName From bbqn.Groups where GroupID=GrpID;
+		 Set Act:= @grpName;
+ ELSE IF(ActType= 'UserDeleted') THEN
+      Select  @grpName :=FirstName From bbqn.users where userID= Act;
+		 Set Act:= @grpName;
+    End IF;
+  End IF;
+   Insert into BBQN.chatgroupaudit(GroupID, ActionTypePerformed, ActionPerformed, LastModifiedBy) 
+             Values(grpID,ActType,Act,uLogINID);
+
+END $$
+DELIMITER ;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+/* BlockUser*/
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS  BlockUser;
+CREATE PROCEDURE BlockUser(IN GroupIDValue int, IN UserIDValue int, OUT Isblocked bool)
+Begin
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+		set Isblocked = true;
+		ROLLBACK;
+    END;
+    Start transaction;
+		update bbqn.groupuser set IsGroupUserBlocked='1' where UserId=UserIDValue and GroupID=GroupIDValue;
+	commit;
+    set Isblocked = false;
+End $$
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

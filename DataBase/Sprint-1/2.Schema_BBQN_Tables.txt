@@ -1,0 +1,291 @@
+CREATE TABLE BBQN.Regions(
+	RegionID int NOT NULL Auto_Increment,
+	RegionName varchar(100) NOT NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(RegionID)
+);
+
+
+CREATE TABLE BBQN.Outlets(
+	OutletID int NOT NULL Auto_Increment,
+	OutletName varchar(100) NOT NULL,
+	RegionID int,
+    LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(OutletID),
+	FOREIGN KEY (RegionID) references BBQN.Regions(RegionID)
+);
+
+
+CREATE TABLE BBQN.UserRole (
+	RoleID int NOT NULL Auto_Increment,
+	RoleName varchar(100) NOT NULL,
+	Description varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(RoleID)
+);
+
+CREATE TABLE BBQN.Grade(
+	GradeID int NOT NULL,
+	GradeCode Varchar(100) NOT NULL,
+	GradeDescription varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(GradeID)
+);
+
+CREATE TABLE BBQN.Departments(
+	DepartmentID int NOT NULL,
+	DepartmentName Varchar(100) NOT NULL,
+	DepartmentDescription varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(DepartmentID)
+);
+
+
+CREATE TABLE BBQN.SubDepartments(
+	SubDepartmentID int NOT NULL,
+	SubDepartmentName Varchar(100) NOT NULL,
+	SubDepartmentDescription varchar(100) NULL,
+    DepartmentID int NOT NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(SubDepartmentID),
+    FOREIGN KEY (DepartmentID) references BBQN.Departments(DepartmentID)
+);
+
+
+
+CREATE TABLE BBQN.Company(
+	CompanyID int NOT NULL,
+	CompanyName Varchar(100) NOT NULL,
+	CompanyDescription varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(CompanyID)
+);
+
+CREATE TABLE BBQN.EmployeeCategory(
+	EmployeeCategoryID int NOT NULL,
+	Name Varchar(100) NOT NULL,
+	Description varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(EmployeeCategoryID)
+);
+
+CREATE TABLE BBQN.Divisions(
+	DivisionID int NOT NULL,
+	Name Varchar(100) NOT NULL,
+	Description varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(DivisionID)
+);
+
+
+
+CREATE TABLE BBQN.Users (
+  UserID int NOT NULL,
+  UserLoginID varchar(100) NOT NULL,
+  FirstName varchar(100) NOT NULL,
+  LastName varchar(100) NULL,
+  Gender ENUM('M', 'F') NOT NULL DEFAULT 'M',
+  CompanyID int NOT NULL,
+  EmailID varchar(100) DEFAULT NULL,
+  JoiningDate datetime NOT NULL,
+  LeavingDate datetime DEFAULT NULL,
+  MobileNumber bigint NOT NULL,
+  IsBlock enum('0','1') NOT NULL DEFAULT '0',
+  IsSuperAdmin enum('0','1') NOT NULL DEFAULT '0',
+  IsPrivilegedUser enum('0','1') NOT NULL DEFAULT '0',
+  IsAdmin enum('1','0') DEFAULT NULL,
+  IsActiveStatus enum('0','1') NOT NULL DEFAULT '1',
+  OutletID int NOT NULL,
+  GradeID int NOT NULL,
+  RoleID int NOT NULL,
+  RegionID int NOT NULL,
+  DepartmentID int NOT NULL,
+  SubDepartmentID int NULL,
+  EmployeeCategoryID int NOT NULL,
+  DivisionID int NOT NULL,
+  LastModifiedBy int NOT NULL,
+  LastModifiedDate datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(UserID)
+);
+
+ALTER TABLE BBQN.Users
+	ADD FOREIGN KEY (GradeID) references BBQN.Grade(GradeID),
+	ADD FOREIGN KEY (RoleID) references BBQN.UserRole(RoleID),
+	ADD FOREIGN KEY (OutletID) references BBQN.Outlets(OutletID),
+    ADD FOREIGN KEY (SubDepartmentID) references BBQN.SubDepartments(SubDepartmentID),
+	ADD FOREIGN KEY (CompanyID) references BBQN.Company(CompanyID),
+    ADD FOREIGN KEY (DivisionID) references BBQN.Divisions(DivisionID),
+	ADD FOREIGN KEY (EmployeeCategoryID) references BBQN.EmployeeCategory(EmployeeCategoryID);
+
+CREATE TABLE BBQN.ActiveUser(
+	UserID int NOT NULL,
+	OTP int NOT NULL,
+	OTPGeneratedTime Datetime NOT NULL,
+    OTPExpiredTime Datetime NOT NULL,
+    LoginType ENUM('1', '2','3') NOT NULL ,
+	MobileNumber bigint(20) NOT NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(UserID,LoginType )
+	
+);
+
+
+CREATE TABLE BBQN.Groups(
+	GroupID int NOT NULL Auto_Increment,
+	GroupName varchar(100) NOT NULL,
+	GroupDescription varchar(100) DEFAULT NULL,
+	GroupURL varchar(500) DEFAULT NULL,
+	StartDate Datetime  NOT NULL,
+	EndDate Datetime NULL,
+	FilterOperator ENUM('0','1', '2','3', '4','5') DEFAULT NULL,
+    IsAutoEnroled enum('1','0') DEFAULT NULL,
+	CompanyID int NOT NULL,
+	RoleID int NOT NULL,
+	GradeID int NULL,
+	RegionID int NOT NULL,
+	OutletID int NOT NULL,
+    DepartmentID int NOT NULL ,
+    SubDepartmentID int NOT NULL ,
+	EmployeeCategoryID int NOT NULL,
+	DivisionID int not null,
+    IsGroupDeleted ENUM('1', '0') NOT NULL DEFAULT '0',
+    IsExEmployeesGroup ENUM('1', '0') NOT NULL DEFAULT '0',
+	IsActiveStatus ENUM('1', '0') DEFAULT NULL,
+	CreatedBy int NULL,
+    LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(GroupID),
+	FOREIGN KEY (RoleID) references BBQN.UserRole(RoleID),
+	FOREIGN KEY (GradeID) references BBQN.Grade(GradeID),
+	FOREIGN KEY (RegionID) references BBQN.Regions(RegionID),
+	FOREIGN KEY (OutletID) references BBQN.Outlets(OutletID),
+    FOREIGN KEY (DepartmentID) references BBQN.Departments(DepartmentID),
+    FOREIGN KEY (SubDepartmentID) references BBQN.SubDepartments(SubDepartmentID),
+	FOREIGN KEY (CompanyID) references BBQN.Company(CompanyID),
+    FOREIGN KEY (EmployeeCategoryID) references BBQN.EmployeeCategory(EmployeeCategoryID),
+	FOREIGN KEY (DivisionID) references BBQN.Divisions(DivisionID)
+);
+
+CREATE TABLE BBQN.GroupUser(
+	GroupID int NOT NULL,
+	UserID int NOT NULL,
+    IsGroupUserDeleted ENUM('0', '1') NOT NULL DEFAULT '0',
+	 LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (GroupID) references BBQN.Groups(GroupID),
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+CREATE TABLE BBQN.Posts(
+	PostID int NOT NULL Auto_Increment,
+	PostDetails varchar(500) NOT NULL,
+	PostTitle varchar(100) NULL,
+	PostType ENUM('Post', 'Poll') NOT NULL DEFAULT 'Post',
+    PostOptions varchar(100) NULL,
+    GroupID int NULL ,
+	UserID int NOT NULL,
+    IsPostDeleted ENUM('0', '1') NOT NULL DEFAULT '0',
+    IsResponseRequired ENUM('0', '1') NOT NULL DEFAULT '1',
+    ImageURL varchar(100) NULL,
+    IsPriorityNotification ENUM('0', '1') NOT NULL DEFAULT '0',
+    IsCommentRequired ENUM('0', '1') NOT NULL DEFAULT '1',
+    IsLikesRequired ENUM('0', '1') NOT NULL DEFAULT '1',
+	IsPostReported ENUM('0', '1') NOT NULL DEFAULT '0',
+    PostActiveDays int NULL ,
+    IsResultDisplayed ENUM('0', '1') NOT NULL DEFAULT '0',
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(PostID),
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+CREATE TABLE BBQN.Comments (
+	CommentID int NOT NULL Auto_Increment,
+	CommentDetails varchar(500) NOT NULL,
+	ParentCommentID int NULL,
+	PostID int NOT NULL,
+	UserID int NOT NULL,
+    IsCommentDeleted ENUM('0', '1') NOT NULL DEFAULT '0',
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(CommentID),
+	FOREIGN KEY (PostID) references BBQN.Posts(PostID),
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+CREATE TABLE BBQN.LikedPosts (
+	PostID int NOT NULL,
+	UserID int NOT NULL,
+	IsLike ENUM('0', '1') NOT NULL DEFAULT '0',
+         PostType ENUM('Post', 'Comment') NOT NULL DEFAULT 'Post',
+        LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (PostID) references BBQN.Posts(PostID),
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+CREATE TABLE BBQN.PollResult (
+	PollID int NOT NULL ,
+	IsAgreed ENUM('0', '1') NOT NULL DEFAULT '0',
+	UserID int NOT NULL,
+	PRIMARY KEY(PollID),
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+
+CREATE TABLE BBQN.SystemConfiguration(
+	ConfigurationID int NOT NULL Auto_Increment,
+	ConfigurationKey varchar(100) NOT NULL,
+	ConfigurationValue Datetime NOT NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(ConfigurationID)
+);
+
+
+CREATE TABLE BBQN.ChatGroupAudit(
+	AuditID int NOT NULL Auto_Increment,
+	GroupID int NOT NULL,
+    ActionTypePerformed ENUM('GroupAdded', 'GroupDeleted','GroupUpdated','UserDeleted') NOT NULL,
+	ActionPerformed varchar(10000) NOT NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(AuditID),
+	FOREIGN KEY (GroupID) references BBQN.Groups(GroupID)
+);
+
+
+CREATE TABLE BBQN.Privileges (
+	PrivilegeID int NOT NULL Auto_Increment,
+	PrivilegeUniqueKey varchar(100) NOT NULL,
+	Description varchar(100) NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY(PrivilegeID)
+);
+
+CREATE TABLE BBQN.PrivilegesUser(
+	PrivilegeIDs varchar(10000) NOT NULL,
+	UserID int NOT NULL,
+    CreatedBy int  NULL,
+	LastModifiedBy int NOT NULL,
+	LastModifiedDate Datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (UserID) references BBQN.Users(UserID)
+);
+
+
+
+
+

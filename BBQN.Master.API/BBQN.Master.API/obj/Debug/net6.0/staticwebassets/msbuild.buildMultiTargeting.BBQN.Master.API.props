@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\BBQN.Master.API.props" />
+</Project>

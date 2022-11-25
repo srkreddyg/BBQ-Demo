@@ -1,0 +1,12 @@
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\bin\release\net6.0\BBQN.CommonMiddleWares.deps.json
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\bin\release\net6.0\BBQN.CommonMiddleWares.dll
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\bin\release\net6.0\BBQN.CommonMiddleWares.pdb
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.csproj.AssemblyReference.cache
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.GeneratedMSBuildEditorConfig.editorconfig
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.AssemblyInfoInputs.cache
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.AssemblyInfo.cs
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.csproj.CoreCompileInputs.cache
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.dll
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\refint\BBQN.CommonMiddleWares.dll
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\BBQN.CommonMiddleWares.pdb
+C:\agent\_work\1\s\BBQN.CommonMiddleWares\BBQN.CommonMiddleWares\obj\release\net6.0\ref\BBQN.CommonMiddleWares.dll

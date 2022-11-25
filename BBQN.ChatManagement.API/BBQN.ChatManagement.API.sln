@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBQN.ChatManagement.API", "BBQN.ChatManagement.API\BBQN.ChatManagement.API.csproj", "{19FC8766-7183-451C-A8BD-A55067933D0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBQN.ChatManagement.API.Test", "BBQN.ChatManagement.API.Test\BBQN.ChatManagement.API.Test.csproj", "{82E0AB80-CCF4-4859-8179-1CAF3F4C7BAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{19FC8766-7183-451C-A8BD-A55067933D0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19FC8766-7183-451C-A8BD-A55067933D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19FC8766-7183-451C-A8BD-A55067933D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19FC8766-7183-451C-A8BD-A55067933D0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82E0AB80-CCF4-4859-8179-1CAF3F4C7BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82E0AB80-CCF4-4859-8179-1CAF3F4C7BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82E0AB80-CCF4-4859-8179-1CAF3F4C7BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82E0AB80-CCF4-4859-8179-1CAF3F4C7BAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {714F46CF-F3DD-4544-B850-9C3EE0764FF8}
+	EndGlobalSection
+EndGlobal

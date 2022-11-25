@@ -1,0 +1,12 @@
+C:\Projects\BBQN.Social\CommonAssemblies\Debug\net6.0\BBQN.DBFactory.deps.json
+C:\Projects\BBQN.Social\CommonAssemblies\Debug\net6.0\BBQN.DBFactory.dll
+C:\Projects\BBQN.Social\CommonAssemblies\Debug\net6.0\BBQN.DBFactory.pdb
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.csproj.AssemblyReference.cache
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.AssemblyInfoInputs.cache
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.AssemblyInfo.cs
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.csproj.CoreCompileInputs.cache
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.dll
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\refint\BBQN.DBFactory.dll
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\BBQN.DBFactory.pdb
+C:\Projects\BBQN.Social\BBQN.DBFactory\BBQN.DBFactory\obj\Debug\net6.0\Debug\net6.0\ref\BBQN.DBFactory.dll

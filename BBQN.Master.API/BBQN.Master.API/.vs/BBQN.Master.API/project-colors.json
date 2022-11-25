@@ -1,0 +1,16 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "6a24f31c-fe96-462c-9a62-a23a35893d69": {
+      "ProjectGuid": "6a24f31c-fe96-462c-9a62-a23a35893d69",
+      "DisplayName": "BBQN.Master.API",
+      "ColorIndex": 0
+    },
+    "ef0a1938-0ebf-4a43-bb56-45f0dd351945": {
+      "ProjectGuid": "ef0a1938-0ebf-4a43-bb56-45f0dd351945",
+      "DisplayName": "BBQN.Master.API.Test",
+      "ColorIndex": 1
+    }
+  },
+  "NextColorIndex": 2
+}

@@ -1,0 +1,95 @@
+
+/* GenerateOTP*/
+use bbqn
+DELIMITER $$
+DROP PROCEDURE IF EXISTS BBQN.GenerateOTP;
+create procedure BBQN.GenerateOTP(IN EmployeeID Varchar(100),IN LType int, OUT OTPGenerated int,OUT MobileNumberout BIGINT(20))
+Begin
+      DECLARE mobno BigINT(10) ;
+    Declare uLogINID int;
+      If EXISTS(Select 1 From BBQN.users where UserLoginID=EmployeeID and isBLock='0' ) then
+		   BEGIN
+          
+				 IF( LType= 1) then
+				  BEGIN
+				   If Not EXISTS( Select 1 From BBQN.users where UserLoginID=EmployeeID and (isAdmin='1' or IsSuperAdmin='1' 
+									  or IsPrivilegedUser='1')) then  
+						BEGIN
+                        
+								set OTPGenerated=MobileNumberout=0;
+						END;
+                        else 
+                          	   BEGIN
+					   START TRANSACTION;
+					
+							 select  MobileNumber into  mobno from BBQN.Users where UserLoginID=EmployeeID limit 1;
+                              select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeID limit 1;
+                            set OTPGenerated=LPAD(FLOOR(RAND() * 999999.99),4,'0') ;
+							  SET MobileNumberout = mobno;
+                                Select OTPGenerated as '';
+						  If not EXISTS(Select 1 From BBQN.ActiveUser where UserID=uLogINID and LoginType= LType) then
+							Insert into BBQN.ActiveUser(UserID,OTP,MobileNumber,LoginType,OTPGeneratedTime,OTPExpiredTime,LastModifiedBy)
+							values (uLogINID,OTPGenerated,MobileNumberout,LType,now(),date_add(now(),interval 30 minute),uLogINID);
+							else
+							   update  BBQN.ActiveUser set OTP=OTPGenerated,OTPExpiredTime=date_add(now(),interval 30 minute), OTPGeneratedTime=now(),lastmodifiedDate= now() where UserID=uLogINID and LoginType= LType;
+							End if;
+					 COMMIT;
+					END;    
+                        END IF;
+					END;
+				else
+				   BEGIN
+					   START TRANSACTION;
+					
+							 select  MobileNumber into  mobno from BBQN.Users where UserLoginID=EmployeeID limit 1;
+                                 select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeID limit 1;
+                             
+							  set OTPGenerated=LPAD(FLOOR(RAND() * 999999.99),4,'0') ;
+							  SET MobileNumberout = mobno;
+                        
+						  If not EXISTS(Select 1 From BBQN.ActiveUser where UserID=uLogINID and LoginType= LType) then
+							Insert into BBQN.ActiveUser(UserID,OTP,MobileNumber,LoginType,OTPGeneratedTime,OTPExpiredTime,LastModifiedBy)
+							values (uLogINID,OTPGenerated,MobileNumberout,LType,now(),date_add(now(),interval 30 minute),uLogINID);
+							else
+							   update  BBQN.ActiveUser set OTP=OTPGenerated,OTPExpiredTime=date_add(now(),interval 30 minute), OTPGeneratedTime=now(),lastmodifiedDate= now() where UserID=uLogINID and LoginType= LType;
+							End if;
+					 COMMIT;
+					END;
+				End if;
+			ENd;
+        Else  
+		set OTPGenerated=MobileNumberout=0;
+        
+	    End if;
+    Select OTPGenerated,MobileNumberout;
+   
+End $$
+DELIMITER ;
+
+/* ValidateUser */
+
+use bbqn;
+DELIMITER $$
+DROP PROCEDURE IF EXISTS BBQN.ValidateUser;
+create procedure BBQN.ValidateUser(IN EmployeeID int, IN OTPValue int, IN LType int,OUT IsUserAuthenticated int)
+Begin
+	Declare uLogINID int;
+     select  UserID into  uLogINID from BBQN.Users where UserLoginID=EmployeeID limit 1;
+	If  EXISTS(Select 1 From BBQN.ActiveUser where UserID = uLogINID And OTP = OTPValue AND LoginType= LType And OTPExpiredTime > now() ) Then
+		set IsUserAuthenticated=1;
+	Else 
+		set IsUserAuthenticated=0;
+	End if;
+End $$
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+

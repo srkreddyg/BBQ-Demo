@@ -1,0 +1,15 @@
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.PostManagement.API.exe
+C:\agent\_work\1\a\BBQN.PostManagement.API\appsettings.Development.json
+C:\agent\_work\1\a\BBQN.PostManagement.API\appsettings.json
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.PostManagement.API.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.PostManagement.API.deps.json
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.PostManagement.API.runtimeconfig.json
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.PostManagement.API.pdb
+C:\agent\_work\1\a\BBQN.PostManagement.API\Castle.Core.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\Microsoft.OpenApi.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\Moq.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\Swashbuckle.AspNetCore.Swagger.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.CommonMiddleWares.dll
+C:\agent\_work\1\a\BBQN.PostManagement.API\BBQN.DBFactory.dll

@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BBQN.Master.API", "BBQN.Master.API.csproj", "{6A24F31C-FE96-462C-9A62-A23A35893D69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBQN.Master.API.Test", "..\BBQN.Master.API.Test\BBQN.Master.API.Test.csproj", "{EF0A1938-0EBF-4A43-BB56-45F0DD351945}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A24F31C-FE96-462C-9A62-A23A35893D69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A24F31C-FE96-462C-9A62-A23A35893D69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A24F31C-FE96-462C-9A62-A23A35893D69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A24F31C-FE96-462C-9A62-A23A35893D69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF0A1938-0EBF-4A43-BB56-45F0DD351945}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF0A1938-0EBF-4A43-BB56-45F0DD351945}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF0A1938-0EBF-4A43-BB56-45F0DD351945}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF0A1938-0EBF-4A43-BB56-45F0DD351945}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4ACF44A1-C783-479A-AFE3-4D3B0398EEE9}
+	EndGlobalSection
+EndGlobal
